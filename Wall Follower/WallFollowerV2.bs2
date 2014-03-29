@@ -42,7 +42,7 @@ DO
 
   GOSUB getBumperDist
 
-  IF (distBumper > MinBumper) THEN    ' If we do NOT get feedback from the QTI...
+  IF (distBumper > MinBumper) THEN    ' If we are outside the bumper threshold...
     GOSUB getWallDist                 ' check distance to wall
 
     IF (distWall > MaxDist) THEN
