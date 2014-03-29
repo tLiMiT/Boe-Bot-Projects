@@ -1,0 +1,105 @@
+' Team 9 - Car Follower Boe-Bot
+' Tim Liming - Joe Robinson - Matt van Berlo
+
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+'Signal program start / reset
+FREQOUT 15, 2000, 3000
+
+'Set Pins -------------------------------------------------------------------
+PING_Left_Echo    PIN   5
+PING_Left_Trig    PIN   4
+PING_Right        PIN   3
+Red_LED           PIN   9
+Green_LED         PIN   10
+Blue_LED          PIN   11
+Right_Motor       PIN   12
+Left_Motor        PIN   13
+
+'Set Constants --------------------------------------------------------------
+MinDist           CON   6     ' minimum distance to car
+MaxDist           CON   8     ' maximum distance to car
+
+Trigger           CON   5     ' send a pulse to PING)))
+Scale             CON   $200  ' raw_data x 2 = uS
+Inches            CON   889   ' 1 / 73.746
+Centimeters       CON   2257  ' 1 / 29.034
+setHigh           CON   1     ' Logic HIGH
+setLow            CON   0     ' Logic LOW
+
+'Declare Variables ----------------------------------------------------------
+distLeft          VAR   Word
+distRight         VAR   Word
+index             VAR   Word
+
+'Main Loop ------------------------------------------------------------------
+DO
+
+  'Set LED Pins low
+  LOW Red_LED: LOW Green_LED: LOW Blue_LED
+
+  'Get the distances
+  GOSUB getDist
+
+  
+
+LOOP
+
+
+' Subroutines ---------------------------------------------------------------
+
+'Subroutine: getDist
+getDist:
+  PING_Left_Echo = setLow                   ' set Left PING LOW
+  PING_Right = setLow                       ' set Right PING LOW
+
+  PULSOUT PING_Left_Trig, Trigger           ' trigger Left PING
+  PULSOUT PING_Right, Trigger               ' trigger Right PING
+
+  PULSIN  PING_Left_Echo, setHigh, distLeft ' receive Left pulse
+  PULSIN  PING_Right, setHigh, distRight    ' receive Right pulse
+
+  distLeft = distLeft */ Scale              ' convert to uS
+  distLeft = distLeft / 2                   ' remove return trip
+  distLeft = distLeft ** Centimeters        ' convert to centimeters
+
+  distRight = distRight */ Scale            ' convert to uS
+  distRight = distRight / 2                 ' remove return trip
+  distRight = distRight ** Centimeters      ' convert to centimeters
+  RETURN
+
+'Subroutine: fastForward
+fastForward:
+  PULSOUT Left_Motor,  850
+  PULSOUT Right_Motor, 650
+  HIGH Green_LED
+  RETURN
+
+'Subroutine: moveForward
+moveForward:
+  PULSOUT Left_Motor,  800
+  PULSOUT Right_Motor, 700
+  HIGH Green_LED
+  RETURN
+
+'Subroutine: moveBack
+moveBack:
+  PULSOUT Left_Motor,  700
+  PULSOUT Right_Motor, 800
+  HIGH Green_LED
+  RETURN
+
+'Subroutine: Turn_Right
+Turn_Right:
+  PULSOUT Left_Motor,  850
+  PULSOUT Right_Motor, 850
+  HIGH Red_LED
+  RETURN
+
+'Subroutine: Turn_Left
+Turn_Left:
+  PULSOUT Left_Motor,  650
+  PULSOUT Right_Motor, 650
+  HIGH Blue_LED
+  RETURN
