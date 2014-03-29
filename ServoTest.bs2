@@ -1,0 +1,30 @@
+' Program to test the servos
+' Servo will rotate, stop, then rotate in the
+' opposite direction.
+'
+' To change servos, change the PULSOUT port:
+' Left: 13;  Right: 12
+
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+DEBUG "Program Running"
+
+counter   VAR    Word
+
+FOR counter = 1 TO 122     ' Clockwise
+  PULSOUT 13, 650
+  PAUSE 20
+NEXT
+
+FOR counter = 1 TO 40      ' Stop
+  PULSOUT 13, 750
+  PAUSE 20
+NEXT
+
+FOR counter = 1 TO 122     ' Counterclockwise
+  PULSOUT 13, 850
+  PAUSE 20
+NEXT
+
+END

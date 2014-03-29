@@ -1,0 +1,86 @@
+' Team 9 - Infrared Line Follower Boe-Bot
+' Tim Liming - Joe Robinson - Matt van Berlo
+
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+'Signal program start / reset
+FREQOUT 15, 2000, 3000
+
+'Declare VARs
+bits      VAR     Nib
+prevState VAR     Nib
+index     VAR     Word
+
+'Initialize OUTB bits to 1
+OUTB = %1111
+
+'Main Loop
+DO
+  'Set LED Pins low
+  LOW 9: LOW 10: LOW 11
+
+  GOSUB Check_QTIs            ' Get QTI states
+
+  SELECT bits
+
+    CASE %0110                ' Forward
+      PULSOUT 13, 800
+      PULSOUT 12, 700
+      prevState = %0110
+      HIGH 10 ' Green LED
+
+    CASE %0000                ' Reverse
+      PULSOUT 13, 700
+      PULSOUT 12, 800
+
+    CASE %0111                ' Right
+      PULSOUT 13, 850
+      PULSOUT 12, 850
+      prevState = %0111
+      HIGH 9 ' Red LED
+
+    CASE %1110                ' Left
+      PULSOUT 13, 650
+      PULSOUT 12, 650
+      prevState = %1110
+      HIGH 11 ' Blue LED
+
+    CASE %1111                ' If we are completely on the tape...
+      SELECT prevState        ' continue in the direction of the previous state
+
+        CASE %1110            ' Left
+          PULSOUT 13, 750
+          PULSOUT 12, 650
+          HIGH 11 ' Blue LED
+
+        CASE %0111            ' Right
+          PULSOUT 13, 850
+          PULSOUT 12, 750
+          HIGH 9 ' Red LED
+
+        CASE %0110            ' Forward
+          PULSOUT 13, 800
+          PULSOUT 12, 700
+          HIGH 10 ' Green LED
+
+      ENDSELECT
+
+    CASE ELSE                 ' Halt
+      PAUSE 3
+
+  ENDSELECT
+LOOP
+
+'Subroutine
+Check_QTIs:
+' Gets a bit string from the QTIs
+' 0 means white, 1 means black
+
+  DIRB = %1111   ' P7..P4 -> output
+  PAUSE 0
+  DIRB = %0000   ' P7..P4 -> input
+  PAUSE 0
+  bits = INB     ' Store QTI outputs in INB
+
+  RETURN

@@ -1,0 +1,31 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+' CheckQtiSubroutine.bs2
+' Displays QTI sensor states. 0 means white surface, 1 means black.
+
+qtis VAR Nib                  ' qti black/white states
+
+OUTB = %1111                  ' Set OUTB bits to 1
+
+DEBUG CRSRX, 8, "FMMF", CR,   ' Display bit positions
+      CRSRX, 8, "LLRR", CR
+
+DO                            ' Main DO...LOOP
+  GOSUB Check_Qtis            ' Get QTI states
+  DEBUG BIN4 ? qtis, CRSRUP   ' Display QTI states
+  PAUSE 100                   ' 1/10 s delay
+LOOP
+
+Check_Qtis:
+' Result -> qtis variable. 0 means white surface, 1 means black
+' surface.
+
+  DIRB = %1111                  ' P7..P4 -> output
+  PAUSE 0                       ' Delay = 230 us
+  DIRB = %0000                  ' P7..P4 -> input
+  PAUSE 0 ' Delay = 230 us
+  ' PULSOUT UnusedPin, 0        ' Delays = 208 + (Duration*2) us
+  qtis = INB ' Store QTI outputs in INB
+
+  RETURN

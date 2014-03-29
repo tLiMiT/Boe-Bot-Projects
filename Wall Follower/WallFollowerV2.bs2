@@ -1,0 +1,113 @@
+' Team 9 - Wall Follower Boe-Bot
+' Tim Liming - Joe Robinson - Matt van Berlo
+
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+'Signal program start / reset
+FREQOUT 15, 2000, 3000
+
+'Set Pins ---------------------------------------------------
+PING_Bumper_Echo  PIN   5
+PING_Bumper_Trig  PIN   4
+PING_Wall         PIN   3
+Red_LED           PIN   9
+Green_LED         PIN   10
+Blue_LED          PIN   11
+Right_Motor       PIN   12
+Left_Motor        PIN   13
+
+'Set Constants ----------------------------------------------
+MinDist           CON   6     ' minimum distance to wall
+MaxDist           CON   8     ' maximum distance to wall
+MinBumper         CON   8     ' minimum distance for bumper
+TurnCount         CON   80    ' cycles to turn robot for
+Trigger           CON   5     ' send a pulse to PING)))
+Scale             CON   $200  ' raw_data x 2 = uS
+Inches            CON   889   ' 1 / 73.746
+Centimeters       CON   2257  ' 1 / 29.034
+setHigh           CON   1     ' Logic HIGH
+setLow            CON   0     ' Logic LOW
+
+'Declare Variables ------------------------------------------
+distWall          VAR   Word
+distBumper        VAR   Word
+index             VAR   Word
+
+'Main Loop --------------------------------------------------
+DO
+
+  'Set LED Pins low
+  LOW Red_LED: LOW Green_LED: LOW Blue_LED
+
+  GOSUB getBumperDist
+
+  IF (distBumper > MinBumper) THEN    ' If we do NOT get feedback from the QTI...
+    GOSUB getWallDist                 ' check distance to wall
+
+    IF (distWall > MaxDist) THEN
+      GOSUB Turn_Right                ' turn towards wall
+
+    ELSEIF (distWall < MinDist) THEN
+      GOSUB Turn_Left                 ' turn away from wall
+
+    ELSE
+      GOSUB Forward                   ' continue forwards
+    ENDIF
+
+  ELSEIF (distBumper <= MinBumper) THEN ' we must be at a wall...
+
+    FOR index = 1 TO TurnCount        ' for turn count...
+      GOSUB Turn_Left                 ' turn left
+    NEXT
+
+  ELSE
+    PAUSE 3                           ' HALT
+
+  ENDIF
+
+LOOP
+
+
+' Subroutines -----------------------------------------------
+
+'Subroutine: getBumperDist
+getBumperDist:
+  PING_Bumper_Echo = setLow                 ' set PING LOW
+  PULSOUT PING_Bumper_Trig, Trigger         ' trigger PING
+  PULSIN  PING_Bumper_Echo, setHigh, distBumper  ' receive pulse
+  distBumper = distBumper */ Scale          ' convert to uS
+  distBumper = distBumper / 2               ' remove return trip
+  distBumper = distBumper ** Centimeters    ' convert to centimeters
+  RETURN
+
+'Subroutine: getWallDist
+getWallDist:
+  PING_Wall = setLow                        ' set PING LOW
+  PULSOUT PING_Wall, Trigger                ' trigger PING
+  PULSIN  PING_Wall, setHigh, distWall      ' receive pulse
+  distWall = distWall */ Scale              ' convert to uS
+  distWall = distWall / 2                   ' remove return trip
+  distWall = distWall ** Centimeters        ' convert to centimeters
+  RETURN
+
+'Subroutine: Forward
+Forward:
+  PULSOUT Left_Motor,  850
+  PULSOUT Right_Motor, 650
+  HIGH Green_LED
+  RETURN
+
+'Subroutine: Turn_Right
+Turn_Right:
+  PULSOUT Left_Motor,  850
+  PULSOUT Right_Motor, 750
+  HIGH Red_LED
+  RETURN
+
+'Subroutine: Turn_Left
+Turn_Left:
+  PULSOUT Left_Motor,  650
+  PULSOUT Right_Motor, 650
+  HIGH Blue_LED
+  RETURN

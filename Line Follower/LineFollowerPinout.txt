@@ -1,0 +1,15 @@
+P15 	Speaker in
+
+P11	1k res to Blue LED
+P10	1k res to Green LED
+P9	1k res to Red LED
+
+P7	Left QTI input
+P6	Center Left QTI input
+P5	Center Right QTI input
+P4	Right QTI input
+
+Vdd is sent to white QTI wires
+Vss is sent to black QTI wires
+
+Speaker out and LED out to Vss

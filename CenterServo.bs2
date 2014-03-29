@@ -1,0 +1,16 @@
+' Program to center the servos
+' Adjust the potentiometer on the running servo
+' so that the servo stops spinning
+'
+' To change servos, change the PULSOUT port:
+' Left: 13;  Right: 12
+
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+DEBUG "Program Running"
+
+DO
+  PULSOUT 13, 750
+  PAUSE 20
+LOOP
