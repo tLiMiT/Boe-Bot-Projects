@@ -22,10 +22,8 @@ MinDist           CON   6     ' minimum distance to wall
 MaxDist           CON   8     ' maximum distance to wall
 MinBumper         CON   8     ' minimum distance for bumper
 TurnCount         CON   80    ' cycles to turn robot for
-Trigger           CON   5     ' send a pulse to PING)))
-Scale             CON   $200  ' raw_data x 2 = uS
-Inches            CON   889   ' 1 / 73.746
-Centimeters       CON   2257  ' 1 / 29.034
+Trigger           CON   5     ' send a pulse to the PING)))
+Centimeters       CON   2251  ' convert PING data to centimeters
 setHigh           CON   1     ' Logic HIGH
 setLow            CON   0     ' Logic LOW
 
@@ -75,9 +73,7 @@ LOOP
 getBumperDist:
   PING_Bumper_Echo = setLow                 ' set PING LOW
   PULSOUT PING_Bumper_Trig, Trigger         ' trigger PING
-  PULSIN  PING_Bumper_Echo, setHigh, distBumper  ' receive pulse
-  distBumper = distBumper */ Scale          ' convert to uS
-  distBumper = distBumper / 2               ' remove return trip
+  PULSIN  PING_Bumper_Echo, setHigh, distBumper ' receive pulse
   distBumper = distBumper ** Centimeters    ' convert to centimeters
   RETURN
 
@@ -86,8 +82,6 @@ getWallDist:
   PING_Wall = setLow                        ' set PING LOW
   PULSOUT PING_Wall, Trigger                ' trigger PING
   PULSIN  PING_Wall, setHigh, distWall      ' receive pulse
-  distWall = distWall */ Scale              ' convert to uS
-  distWall = distWall / 2                   ' remove return trip
   distWall = distWall ** Centimeters        ' convert to centimeters
   RETURN
 
