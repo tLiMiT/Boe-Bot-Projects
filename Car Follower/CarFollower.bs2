@@ -19,8 +19,8 @@ Left_Motor        PIN   13
 
 'Set Constants --------------------------------------------------------------
 MinDist           CON   6     ' minimum distance to car
-MaxDist           CON   8     ' maximum distance to car
-
+MaxDist           CON   10     ' maximum distance to car
+Threshold         CON   7     ' threshold distance to car
 Trigger           CON   5     ' send a pulse to PING)))
 Scale             CON   $200  ' raw_data x 2 = uS
 Inches            CON   889   ' 1 / 73.746
@@ -40,29 +40,55 @@ DO
   LOW Red_LED: LOW Green_LED: LOW Blue_LED
 
   'Get the distances
-  GOSUB getDist
+  GOSUB getDistLeft
+  PAUSE 100
+  GOSUB getDistRight
 
-  
+  HIGH Red_LED
+
+  IF ((distLeft = Threshold) & (distRight = Threshold)) THEN
+    ' HALT
+    PAUSE 3
+
+  ELSEIF ((distLeft < maxDist+2) & (distRight < maxDist+2) & (distLeft > minDist-2) & (distRight > minDist-2)) THEN
+    GOSUB fastForward
+
+  ELSEIF ((distLeft < minDist) & (distRight < minDist)) THEN
+    GOSUB moveBack
+
+  ELSEIF ((distLeft > minDist) | (distRight < minDist)) THEN
+    GOSUB Turn_Right
+
+
+  'ELSEIF ((distLeft < maxDist) | (distRight > maxDist)) THEN
+  '  GOSUB Turn_Left
+
+
+  ENDIF
 
 LOOP
 
 
 ' Subroutines ---------------------------------------------------------------
 
-'Subroutine: getDist
-getDist:
+'Subroutine: getDistLeft
+getDistLeft:
   PING_Left_Echo = setLow                   ' set Left PING LOW
-  PING_Right = setLow                       ' set Right PING LOW
 
   PULSOUT PING_Left_Trig, Trigger           ' trigger Left PING
-  PULSOUT PING_Right, Trigger               ' trigger Right PING
-
   PULSIN  PING_Left_Echo, setHigh, distLeft ' receive Left pulse
-  PULSIN  PING_Right, setHigh, distRight    ' receive Right pulse
 
   distLeft = distLeft */ Scale              ' convert to uS
   distLeft = distLeft / 2                   ' remove return trip
   distLeft = distLeft ** Centimeters        ' convert to centimeters
+  RETURN
+
+'Subroutine: getDistRight
+getDistRight:
+  PING_Right = setLow                       ' set Right PING LOW
+
+  PULSOUT PING_Right, Trigger               ' trigger Right PING
+  PULSIN  PING_Right, setHigh, distRight    ' receive Right pulse
 
   distRight = distRight */ Scale            ' convert to uS
   distRight = distRight / 2                 ' remove return trip
@@ -87,7 +113,7 @@ moveForward:
 moveBack:
   PULSOUT Left_Motor,  700
   PULSOUT Right_Motor, 800
-  HIGH Green_LED
+  'HIGH Green_LED
   RETURN
 
 'Subroutine: Turn_Right

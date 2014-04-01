@@ -1,0 +1,101 @@
+' Team 9 - Car Follower Boe-Bot
+' Tim Liming - Joe Robinson - Matt van Berlo
+
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+'Signal program start / reset
+FREQOUT 15, 200, 2500: FREQOUT 15, 200, 2000
+FREQOUT 15, 200, 2500: FREQOUT 15, 700, 3000
+
+'Set Pins -------------------------------------------------------------------
+PING_Left         PIN   3
+PING_Right_Trig   PIN   4
+PING_Right_Echo   PIN   5
+Red_LED           PIN   9
+Green_LED         PIN   10
+Blue_LED          PIN   11
+Right_Motor       PIN   12
+Left_Motor        PIN   13
+
+'Set Constants --------------------------------------------------------------
+servoCenter       CON   750   ' servo is stopped
+MinDist           CON   6     ' minimum distance to car
+MaxDist           CON   9     ' maximum distance to car
+Trigger           CON   5     ' send a pulse to PING)))
+Centimeters       CON   2251  ' convert PING data to centimeters
+setHigh           CON   1     ' Logic HIGH
+setLow            CON   0     ' Logic LOW
+
+'Declare Variables ----------------------------------------------------------
+distLeft          VAR   Word
+distRight         VAR   Word
+pulseLeft         VAR   Word
+pulseRight        VAR   Word
+
+
+'Main Loop ------------------------------------------------------------------
+DO
+
+  'Set RGB LED Pins low
+  LOW Red_LED: LOW Green_LED: LOW Blue_LED
+
+  'Get the distances
+  GOSUB getDistances
+
+  'Handle Left PING input
+  IF (ABS(maxDist - distLeft) > 2) THEN
+    pulseLeft = 800
+  ELSEIF (ABS(minDist - distLeft) =< 2) THEN
+    pulseLeft = 700
+  ELSE
+    pulseLeft = servoCenter
+  ENDIF
+
+  'Handle Right PING input
+  IF (ABS(maxDist - distRight) > 2) THEN
+    pulseRight = 700
+  ELSEIF (ABS(minDist - distRight) =< 2) THEN
+    pulseRight = 800
+  ELSE
+    pulseRight = servoCenter
+  ENDIF
+
+  'Send pulses to drive motors
+  GOSUB sendMotorPulse
+
+LOOP
+
+
+' Subroutines ---------------------------------------------------------------
+
+'Subroutine: getDistances
+getDistances:
+  PULSOUT PING_Left, Trigger
+  PULSIN  PING_Left, setHigh, distLeft
+
+  PAUSE 5
+
+  PULSOUT PING_Right_Trig, Trigger
+  PULSIN  PING_Right_Echo, setHigh, distRight
+
+  distLeft = distLeft ** Centimeters
+  distRight = distRight ** Centimeters
+
+  RETURN
+
+'Subroutine: sendMotorPulse
+sendMotorPulse:
+  IF ((pulseLeft = 800) & (pulseRight = 700)) | ((pulseLeft = 700) & (pulseRight = 800)) THEN
+    HIGH Green_LED      ' Forward
+  ELSEIF ((pulseLeft = 800) & (pulseRight = 800)) | ((pulseLeft = 800) & (pulseRight = 750)) THEN
+    HIGH Red_LED        ' Right
+  ELSEIF ((pulseLeft = 700) & (pulseRight = 700)) | ((pulseLeft = 750) & (pulseRight = 700)) THEN
+    HIGH Blue_LED       ' Left
+  ENDIF
+
+  PULSOUT Left_Motor,  pulseLeft
+  PULSOUT Right_Motor, pulseRight
+  PAUSE 5
+
+  RETURN

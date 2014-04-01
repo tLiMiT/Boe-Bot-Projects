@@ -1,0 +1,24 @@
+' Various PING Tests
+
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+left  VAR Word
+right VAR Word
+
+DO
+
+ PULSOUT 3, 5
+ PULSIN 3, 1, left
+ PAUSE 5
+ PULSOUT 4, 5
+ PULSIN 5, 1, right
+
+ left = left ** 2251
+ right = right ** 2251
+
+ DEBUG HOME, "left (cm) = ", DEC left
+ DEBUG HOME, CR, "right (cm) = ", DEC right
+ PAUSE 100
+
+LOOP
