@@ -20,8 +20,8 @@ Left_Motor        PIN   13
 
 'Set Constants --------------------------------------------------------------
 servoCenter       CON   750   ' servo is stopped
-MinDist           CON   6     ' minimum distance to car
-MaxDist           CON   9     ' maximum distance to car
+MinDist           CON   8     ' minimum distance to car
+MaxDist           CON   15    ' maximum distance to car
 Trigger           CON   5     ' send a pulse to PING)))
 Centimeters       CON   2251  ' convert PING data to centimeters
 setHigh           CON   1     ' Logic HIGH
@@ -44,19 +44,19 @@ DO
   GOSUB getDistances
 
   'Handle Left PING input
-  IF (ABS(maxDist - distLeft) > 2) THEN
-    pulseLeft = 800
-  ELSEIF (ABS(minDist - distLeft) =< 2) THEN
-    pulseLeft = 700
+  IF (MaxDist <= distLeft) THEN
+    pulseLeft = 850
+  ELSEIF (MinDist > distLeft) THEN
+    pulseLeft = 650
   ELSE
     pulseLeft = servoCenter
   ENDIF
 
   'Handle Right PING input
-  IF (ABS(maxDist - distRight) > 2) THEN
-    pulseRight = 700
-  ELSEIF (ABS(minDist - distRight) =< 2) THEN
-    pulseRight = 800
+  IF (MaxDist <= distRight) THEN
+    pulseRight = 650
+  ELSEIF (MinDist > distRight) THEN
+    pulseRight = 850
   ELSE
     pulseRight = servoCenter
   ENDIF
@@ -86,11 +86,11 @@ getDistances:
 
 'Subroutine: sendMotorPulse
 sendMotorPulse:
-  IF ((pulseLeft = 800) & (pulseRight = 700)) | ((pulseLeft = 700) & (pulseRight = 800)) THEN
-    HIGH Green_LED      ' Forward
-  ELSEIF ((pulseLeft = 800) & (pulseRight = 800)) | ((pulseLeft = 800) & (pulseRight = 750)) THEN
+  IF ((pulseLeft = 850) & (pulseRight = 650)) | ((pulseLeft = 650) & (pulseRight = 850)) THEN
+    HIGH Green_LED      ' Forward | Reverse
+  ELSEIF ((pulseLeft = 850) & (pulseRight = 850)) | ((pulseLeft = 850) & (pulseRight = 750)) THEN
     HIGH Red_LED        ' Right
-  ELSEIF ((pulseLeft = 700) & (pulseRight = 700)) | ((pulseLeft = 750) & (pulseRight = 700)) THEN
+  ELSEIF ((pulseLeft = 650) & (pulseRight = 650)) | ((pulseLeft = 750) & (pulseRight = 650)) THEN
     HIGH Blue_LED       ' Left
   ENDIF
 

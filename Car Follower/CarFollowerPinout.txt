@@ -1,0 +1,16 @@
+P15 	Speaker in
+
+P11	1k res to Blue LED
+P10	1k res to Green LED
+P9	1k res to Red LED
+
+P5	Fake PING Echo	(Fake PING has 4 pins, not 3)
+P4	Fake PING Trig
+
+P3	PING))) Sensor Signal
+
+Vdd is sent to Fake PING Vcc pin and red PING))) wire
+Vss is sent to Fake PING GND pin and black PING))) wire
+
+Speaker out and LED out to Vss
+
